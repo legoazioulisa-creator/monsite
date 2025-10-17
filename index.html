@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Papeterie Étoilée - Boutique</title>
+<style>
+  :root {
+    --couleur-principale: #5a2a83;
+    --couleur-secondaire: #9b65c9;
+    --couleur-claire: #d7b2e2;
+    --couleur-texte: #f0e9ff;
+    --couleur-etincelle: #fff;
+  }
+
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, var(--couleur-principale) 0%, var(--couleur-secondaire) 50%, var(--couleur-claire) 100%);
+    color: var(--couleur-texte);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+    z-index: 1;
+  }
+
+  header {
+    padding: 1.5rem 2rem;
+    text-align: center;
+    font-size: 2.8rem;
+    font-weight: 700;
+    text-shadow: 1px 1px 6px rgba(0,0,0,0.4);
+    position: relative;
+  }
+
+  .cart-icon {
+    position: absolute;
+    top: 50%;
+    right: 2rem;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-size: 2rem;
+    transition: transform 0.3s ease;
+  }
+
+  .cart-icon:hover {
+    transform: translateY(-50%) scale(1.1);
+  }
+
+  .cart-badge {
+    position: absolute;
+    top: -5px;
+    right: -10px;
+    background: #ff4757;
+    color: white;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: bold;
+  }
+
+  nav {
+    display: flex;
+    justify-content: center;
+    background: rgba(90, 42, 131, 0.9);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  }
+
+  nav button {
+    background: none;
+    border: none;
+    padding: 1rem 2rem;
+    font-size: 1.2rem;
+    color: #e1d5ff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+  }
+
+  nav button:hover,
+  nav button.active {
+    background: var(--couleur-claire);
+    color: #3b176a;
+    border-radius: 8px 8px 0 0;
+  }
+
+  main {
+    max-width: 900px;
+    margin: 2rem auto 4rem;
+    padding: 2rem;
+    background: rgba(50, 10, 80, 0.25);
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.3);
+    color: #fff;
+    position: relative;
+    z-index: 1;
+  }
+
+  section {
+    display: none;
+    animation: fadeIn 0.5s ease;
+  }
+  section.active {
+    display: block;
+  }
+
+  @keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+  }
+
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .product-card {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 1.5rem;
+    border-radius: 12px;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    backdrop-filter: blur(10px);
+  }
+
+  .product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(255, 255, 255, 0.2);
+  }
+
+  .product-card h3 {
+    margin-top: 0;
+    color: #fff;
+  }
+
+  .product-card .price {
+    font-size: 1.5rem;
+    color: var(--couleur-claire);
+    font-weight: bold;
+    margin: 1rem 0;
+  }
+
+  .product-card button {
+    background: var(--couleur-secondaire);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.3s ease;
+  }
+
+  .product-card button:hover {
+    background: var(--couleur-principale);
+  }
+
+  /* Panier */
+  .cart-item {
+    background: rgba(255, 255, 255, 0.15);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .cart-item-info {
+    flex: 1;
+  }
+
+  .cart-item-name {
+    font-weight: bold;
+    font-size: 1.1rem;
+  }
+
+  .cart-item-price {
+    color: var(--couleur-claire);
+    margin-top: 0.25rem;
+  }
+
+  .cart-item-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .quantity-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .quantity-controls button {
+    background: var(--couleur-secondaire);
+    color: white;
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+  .quantity-controls button:hover {
+    background: var(--couleur-principale);
+  }
+
+  .quantity-display {
+    font-weight: bold;
+    min-width: 30px;
+    text-align: center;
+  }
+
+  .remove-btn {
+    background: #ff4757;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  .remove-btn:hover {
+    background: #d63447;
+  }
+
+  .cart-summary {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+  }
+
+  .cart-total {
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-align: right;
+    margin-bottom: 1rem;
+  }
+
+  .checkout-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    color: white;
+    border: none;
+    padding: 1rem;
+    font-size: 1.2rem;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+  }
+
+  .checkout-btn:hover {
+    transform: scale(1.02);
+  }
+
+  .checkout-btn:disabled {
+    background: #7f8c8d;
+    cursor: not-allowed;
+    transform: scale(1);
+  }
+
+  .empty-cart {
+    text-align: center;
+    padding: 3rem;
+    font-size: 1.2rem;
+    color: var(--couleur-claire);
+  }
+  
+ .product-card img {
+    width: 80%; 
+    height: 150px;
+    object-fit: contain;
+    border-radius: 10px;
+    margin: 0 auto 1rem;
+    display: block;
+    background: rgba(230, 230, 230, 0.1);
+ 
+  }
+
+  /* Notification */
+  .notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #2ecc71;
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    z-index: 1000;
+    animation: slideIn 0.3s ease;
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateX(400px);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  /* === DÉCORATIONS FIXES DERRIÈRE LE TEXTE === */
+  .decorations {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: -1;
+    overflow: hidden;
+  }
+
+  .decorations svg {
+    position: fixed;
+    width: 60px;
+    height: 60px;
+    opacity: 0.75;
+    filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.25));
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+  }
+
+  .paper-star { fill: #d9c9ff; animation: floatStar 6s infinite; }
+  .paper-boat { fill: #a28acb; animation: floatBoat 8s infinite; }
+  .jellyfish { fill: #cfa7ff; animation: floatJelly 7s infinite; }
+
+  @keyframes floatStar {
+    0%, 100% { transform: translateY(0); opacity: 0.75; }
+    50% { transform: translateY(-15px); opacity: 1; }
+  }
+
+  @keyframes floatBoat {
+    0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.75; }
+    50% { transform: translateY(-20px) rotate(10deg); opacity: 1; }
+  }
+
+  @keyframes floatJelly {
+    0%, 100% { transform: translateY(0) scale(1); opacity: 0.75; }
+    50% { transform: translateY(-18px) scale(1.1); opacity: 1; }
+  }
+
+  .star1 { top: 10%; left: 15%; animation-delay: 0s; }
+  .star2 { top: 40%; left: 70%; animation-delay: 2s; }
+  .star3 { top: 75%; left: 35%; animation-delay: 4s; }
+  .star4 { top: 85%; left: 85%; animation-delay: 1.5s; }
+  .star5 { top: 25%; left: 85%; animation-delay: 3.5s; }
+
+  .boat1 { top: 20%; left: 50%; animation-delay: 1s; }
+  .boat2 { top: 60%; left: 80%; animation-delay: 3s; }
+  .boat3 { top: 80%; left: 15%; animation-delay: 2s; }
+  .boat4 { top: 50%; left: 5%; animation-delay: 4s; }
+
+  .jelly1 { top: 35%; left: 25%; animation-delay: 0.5s; }
+  .jelly2 { top: 70%; left: 60%; animation-delay: 2.5s; }
+  .jelly3 { top: 15%; left: 45%; animation-delay: 1.2s; }
+  .jelly4 { top: 90%; left: 50%; animation-delay: 3.8s; }
+  
+  }
+
+</style>
+</head>
+<body>
+
+<header>
+  🌟 Papeterie Étoilée 🌟
+  <div class="cart-icon" onclick="showCart()">
+    🛒
+    <span class="cart-badge" id="cartBadge">0</span>
+  </div>
+</header>
+
+<nav>
+  <button class="active" data-target="home">Accueil</button>
+  <button data-target="stars">Étoiles en papier</button>
+  <button data-target="boats">Bateaux en papier</button>
+  <button data-target="jellyfish">Méduses en papier</button>
+  <button data-target="cart">Mon Panier</button>
+</nav>
+
+<main>
+  <section id="home" class="active">
+    <h2>Laissez vos rêves vous guider chez Papeterie Étoilée !</h2>
+    <p>Découvrez nos créations artisanales en papier : étoiles délicates, bateaux voyageur ou méduses magiques ? Faites votre choix !</p>
+    <p>Chaque pièce est fabriquée par notre équipe à la main avec notre savoir faire venu de plusieurs disciplines artistiques différentes. Naviguez dans nos différentes collections pour trouver la création parfaite qui illuminera votre intérieur.</p>
+  </section>
+
+  <section id="stars">
+    <h2>✨ Collection Étoiles en papier</h2>
+    <p>Nos étoiles en papier apportent une touche magique à n'importe quel espace.</p>
+    <div class="product-grid">
+      <div class="product-card">
+        <h3>Petite Étoile</h3>
+        <img src="petite étoile.png" alt="Petite Etoile" />
+        <div class="price">7,99 €</div>
+        <button onclick="addToCart('Petite Etoile', 7.99)">Ajouter au panier</button>
+      </div>
+      <div class="product-card">
+        <h3>Constellation</h3>
+       <img src="constellations.png" alt="Constellation" />
+        <div class="price">14,99 €</div>
+        <button onclick="addToCart('Constellation', 14.99)">Ajouter au panier</button>
+		 </div>
+		<div class="product-card">
+		 <h3>Étoile du Berger </h3>
+        <img src="étoile du berger.png" alt="Etoile du Berger" />
+        <div class="price">23,99 €</div>
+        <button onclick="addToCart('Étoile du Berger', 23.99)">Ajouter au panier</button>
+		 </div>
+  </section>
+
+  <section id="boats">
+    <h2>⛵ Collection Bateaux en papier</h2>
+    <p>Nos bateaux en papier évoquent l'aventure et le voyage. Etes vous prêts à embarquer ?</p>
+    <div class="product-grid">
+      <div class="product-card">
+        <h3>Petit Bateau</h3>
+        <img src="petit bateau.png" alt="Petit Bateau" />
+        <div class="price">4,99 €</div>
+        <button onclick="addToCart('Petit Bateau', 4.99)">Ajouter au panier</button>
+      </div>
+      <div class="product-card">
+        <h3>Voilier Intrépide</h3>
+        <img src="voilier.png" alt="Voilier Intrépide" />
+        <div class="price">8,99 €</div>
+        <button onclick="addToCart('Voilier Intrépide', 8.99)">Ajouter au panier</button>
+      </div>
+      <div class="product-card">
+        <h3>Lot de Bateaux</h3>
+        <img src="lot de bateaux.png" alt="Lot de Bateaux" />
+        <div class="price">15,99 €</div>
+        <button onclick="addToCart('Lot de Bateaux', 15.99)">Ajouter au panier</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="jellyfish">
+    <h2>🪼 Collection Méduses en papier maché</h2>
+    <p>Nos méduses en papier maché flottent délicatement et créent une atmosphère apaisante.</p>
+    <div class="product-grid">
+      <div class="product-card">
+        <h3>Méduse Lumineuse</h3>
+        <img src="méduse petite.png" alt="Méduse Lumineuse" />
+        <div class="price">12,99 €</div>
+        <button onclick="addToCart('Méduse Lumineuse', 12.99)">Ajouter au panier</button>
+      </div>
+      <div class="product-card">
+        <h3>Méduse Aurore</h3>
+        <img src="méduse aurore.png" alt="Méduse Aurore" />
+        <div class="price">16,99 €</div>
+        <button onclick="addToCart('Méduse Aurore', 16.99)">Ajouter au panier</button>
+      </div>
+      <div class="product-card">
+        <h3>Banc de Méduses</h3>
+        <img src="banc de méduses.png" alt="Banc de Méduses" />
+        <div class="price">20,99 €</div>
+        <button onclick="addToCart('Banc de Méduses', 20.99)">Ajouter au panier</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="cart">
+    <h2>🛒 Mon Panier</h2>
+    <div id="cartContent"></div>
+  </section>
+</main>
+
+<div class="decorations">
+  <svg class="paper-star star1" viewBox="0 0 64 64"><polygon points="32,4 39,24 60,24 42,38 49,58 32,46 15,58 22,38 4,24 25,24" /></svg>
+  <svg class="paper-star star2" viewBox="0 0 64 64"><polygon points="32,4 39,24 60,24 42,38 49,58 32,46 15,58 22,38 4,24 25,24" /></svg>
+  <svg class="paper-star star3" viewBox="0 0 64 64"><polygon points="32,4 39,24 60,24 42,38 49,58 32,46 15,58 22,38 4,24 25,24" /></svg>
+  <svg class="paper-star star4" viewBox="0 0 64 64"><polygon points="32,4 39,24 60,24 42,38 49,58 32,46 15,58 22,38 4,24 25,24" /></svg>
+  <svg class="paper-star star5" viewBox="0 0 64 64"><polygon points="32,4 39,24 60,24 42,38 49,58 32,46 15,58 22,38 4,24 25,24" /></svg>
+
+  <svg class="paper-boat boat1" viewBox="0 0 64 64"><polygon points="4,48 32,20 60,48 32,44" /><polygon points="20,44 32,28 44,44" fill="#7f6ea0"/></svg>
+  <svg class="paper-boat boat2" viewBox="0 0 64 64"><polygon points="4,48 32,20 60,48 32,44" /><polygon points="20,44 32,28 44,44" fill="#7f6ea0"/></svg>
+  <svg class="paper-boat boat3" viewBox="0 0 64 64"><polygon points="4,48 32,20 60,48 32,44" /><polygon points="20,44 32,28 44,44" fill="#7f6ea0"/></svg>
+  <svg class="paper-boat boat4" viewBox="0 0 64 64"><polygon points="4,48 32,20 60,48 32,44" /><polygon points="20,44 32,28 44,44" fill="#7f6ea0"/></svg>
+
+  <svg class="jellyfish jelly1" viewBox="0 0 64 64"><ellipse cx="32" cy="24" rx="16" ry="12" /><path d="M16 36 q5 20 16 0 q11 20 16 0" stroke="#8c4fd6" stroke-width="2" fill="none" /></svg>
+  <svg class="jellyfish jelly2" viewBox="0 0 64 64"><ellipse cx="32" cy="24" rx="16" ry="12" /><path d="M16 36 q5 20 16 0 q11 20 16 0" stroke="#8c4fd6" stroke-width="2" fill="none" /></svg>
+  <svg class="jellyfish jelly3" viewBox="0 0 64 64"><ellipse cx="32" cy="24" rx="16" ry="12" /><path d="M16 36 q5 20 16 0 q11 20 16 0" stroke="#8c4fd6" stroke-width="2" fill="none" /></svg>
+  <svg class="jellyfish jelly4" viewBox="0 0 64 64"><ellipse cx="32" cy="24" rx="16" ry="12" /><path d="M16 36 q5 20 16 0 q11 20 16 0" stroke="#8c4fd6" stroke-width="2" fill="none" /></svg>
+</div>
+
+<script>
+  // Panier stocké en mémoire
+  let cart = [];
+
+  // Gestion de la navigation entre les onglets
+  const navButtons = document.querySelectorAll('nav button');
+  const sections = document.querySelectorAll('main section');
+
+  navButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      navButtons.forEach(btn => btn.classList.remove('active'));
+      sections.forEach(section => section.classList.remove('active'));
+
+      button.classList.add('active');
+      const targetId = button.getAttribute('data-target');
+      document.getElementById(targetId).classList.add('active');
+
+      if (targetId === 'cart') {
+        displayCart();
+      }
+    });
+  });
+
+  // Ajouter au panier
+  function addToCart(name, price) {
+    const existingItem = cart.find(item => item.name === name);
+    
+    if (existingItem) {
+      existingItem.quantity += 1;
+    } else {
+      cart.push({ name, price, quantity: 1 });
+    }
+    
+    updateCartBadge();
+    showNotification(`${name} ajouté au panier !`);
+  }
+
+  // Mettre à jour le badge du panier
+  function updateCartBadge() {
+    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+    document.getElementById('cartBadge').textContent = totalItems;
+  }
+
+  // Afficher une notification
+  function showNotification(message) {
+    const notification = document.createElement('div');
+    notification.className = 'notification';
+    notification.textContent = message;
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+      notification.remove();
+    }, 3000);
+  }
+
+  // Afficher le panier
+  function displayCart() {
+    const cartContent = document.getElementById('cartContent');
+    
+    if (cart.length === 0) {
+      cartContent.innerHTML = '<div class="empty-cart">Votre panier est vide 😢<br>Commencez vos achats !</div>';
+      return;
+    }
+
+    let html = '';
+    let total = 0;
+
+    cart.forEach((item, index) => {
+      const itemTotal = item.price * item.quantity;
+      total += itemTotal;
+
+      html += `
+        <div class="cart-item">
+          <div class="cart-item-info">
+            <div class="cart-item-name">${item.name}</div>
+            <div class="cart-item-price">${item.price.toFixed(2)} € × ${item.quantity} = ${itemTotal.toFixed(2)} €</div>
+          </div>
+          <div class="cart-item-controls">
+            <div class="quantity-controls">
+              <button onclick="decreaseQuantity(${index})">-</button>
+              <span class="quantity-display">${item.quantity}</span>
+              <button onclick="increaseQuantity(${index})">+</button>
+            </div>
+            <button class="remove-btn" onclick="removeFromCart(${index})">Supprimer</button>
+          </div>
+        </div>
+      `;
+    });
+
+    html += `
+      <div class="cart-summary">
+        <div class="cart-total">Total : ${total.toFixed(2)} €</div>
+        <button class="checkout-btn" onclick="checkout()">Procéder au paiement</button>
+      </div>
+    `;
+
+    cartContent.innerHTML = html;
+  }
+
+  // Augmenter la quantité
+  function increaseQuantity(index) {
+    cart[index].quantity += 1;
+    updateCartBadge();
+    displayCart();
+  }
+
+  // Diminuer la quantité
+  function decreaseQuantity(index) {
+    if (cart[index].quantity > 1) {
+      cart[index].quantity -= 1;
+      updateCartBadge();
+      displayCart();
+    } else {
+      removeFromCart(index);
+    }
+  }
+
+  // Supprimer du panier
+  function removeFromCart(index) {
+    cart.splice(index, 1);
+    updateCartBadge();
+    displayCart();
+  }
+
+  // Afficher le panier (clic sur l'icône)
+  function showCart() {
+    navButtons.forEach(btn => btn.classList.remove('active'));
+    sections.forEach(section => section.classList.remove('active'));
+
+    const cartButton = document.querySelector('[data-target="cart"]');
+    cartButton.classList.add('active');
+    document.getElementById('cart').classList.add('active');
+    displayCart();
+  }
+
+  // Procéder au paiement
+ function checkout() {
+  const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  // Sauvegarder le total dans sessionStorage pour la page paiement
+  sessionStorage.setItem('cartTotal', total.toFixed(2));
+  // Rediriger vers la page de paiement
+  window.location.href = 'paiement.html';
+}
+
+</script>
+
+</body>
+</html>
